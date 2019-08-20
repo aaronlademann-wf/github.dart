@@ -194,10 +194,13 @@ class CreatePullRequest {
   /// Pull Request Body
   String body;
 
-  CreatePullRequest(this.title, this.head, this.base, {this.body});
+  /// Additional Fields
+  Map<String, dynamic> additionalFields;
+
+  CreatePullRequest(this.title, this.head, this.base, {this.body, this.additionalFields = const {}});
 
   String toJSON() {
-    var map = <String, dynamic>{};
+    var map = additionalFields;
     putValue("title", title, map);
     putValue("head", head, map);
     putValue("base", base, map);
