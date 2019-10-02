@@ -54,6 +54,9 @@ class PullRequestInformation {
   /// The User who created the Pull Request
   User user;
 
+  /// Whether or not the pull request is a draft
+  bool draft;
+
   PullRequestInformation([this.isCompletePullRequest = false]);
 
   static PullRequestInformation fromJSON(Map<String, dynamic> input,
@@ -75,6 +78,7 @@ class PullRequestInformation {
     pr.closedAt = parseDateTime(input['closed_at']);
     pr.mergedAt = parseDateTime(input['merged_at']);
     pr.user = User.fromJson(input['user'] as Map<String, dynamic>);
+    pr.draft = input['draft'] ?? false;
     return pr;
   }
 }
@@ -112,6 +116,9 @@ class PullRequest extends PullRequestInformation {
   /// Pull Request ID
   int id;
 
+  /// Pull Request Labels
+  List<IssueLabel> labels;
+
   PullRequest() : super(true);
 
   static PullRequest fromJSON(Map<String, dynamic> input) {
@@ -128,6 +135,10 @@ class PullRequest extends PullRequestInformation {
     pr.additionsCount = input['additions'];
     pr.deletionsCount = input['deletions'];
     pr.changedFilesCount = input['changed_files'];
+    pr.labels = input['labels']
+        ?.cast<Map<String, dynamic>>()
+        ?.map<IssueLabel>(IssueLabel.fromJSON)
+        ?.toList();
     return pr;
   }
 }
@@ -300,6 +311,7 @@ class PullRequestFile {
   int changesCount;
   String blobUrl;
   String rawUrl;
+  String contentsUrl;
   String patch;
 
   static PullRequestFile fromJSON(Map<String, dynamic> input) {
@@ -312,6 +324,7 @@ class PullRequestFile {
     file.changesCount = input['changes'];
     file.blobUrl = input['blob_url'];
     file.rawUrl = input['raw_url'];
+    file.contentsUrl = input['contents_url'];
     file.patch = input['patch'];
     return file;
   }
