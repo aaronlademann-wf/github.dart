@@ -1,4 +1,5 @@
-part of github.common;
+import 'dart:async';
+import 'package:github/src/common.dart';
 
 /// The [UrlShortenerService] provides a handy method to access GitHub's
 /// url shortener.
@@ -10,7 +11,7 @@ class UrlShortenerService extends Service {
   /// Shortens the provided [url]. An optional [code] can be provided to create
   /// your own vanity URL.
   Future<String> shortenUrl(String url, {String code}) {
-    var params = <String, String>{};
+    final params = <String, dynamic>{};
 
     params['url'] = url;
 
@@ -18,14 +19,14 @@ class UrlShortenerService extends Service {
       params['code'] = code;
     }
 
-    return _github
-        .request("POST", "http://git.io/", params: params)
+    return github
+        .request('POST', 'http://git.io/', params: params)
         .then((response) {
       if (response.statusCode != StatusCodes.CREATED) {
-        throw GitHubError(_github, "Failed to create shortened url!");
+        throw GitHubError(github, 'Failed to create shortened url!');
       }
 
-      return response.headers["Location"].split("/").last;
+      return response.headers['Location'].split('/').last;
     });
   }
 }

@@ -1,30 +1,30 @@
 import 'dart:async';
-import "dart:html";
+import 'dart:html';
 
-import "common.dart";
+import 'common.dart';
 
-DivElement emojiDiv;
+Element emojiDiv;
 
 Future<void> main() async {
-  await initViewSourceButton("emoji.dart");
-  emojiDiv = querySelector("#emojis");
+  await initViewSourceButton('emoji.dart');
+  emojiDiv = querySelector('#emojis');
   await loadEmojis();
-  var searchBox = querySelector("#search-box") as InputElement;
+  final searchBox = querySelector('#search-box') as InputElement;
   searchBox.onKeyUp.listen((event) {
     filter(searchBox.value);
   });
 }
 
 Future<void> loadEmojis() async {
-  var emojis = await github.misc.listEmojis();
+  final emojis = await github.misc.listEmojis();
 
   emojis.forEach((name, url) {
-    var h = DivElement();
+    final h = DivElement();
     h.className = 'emojibox';
-    h.style.textAlign = "center";
+    h.style.textAlign = 'center';
     h.append(
-        ImageElement(src: url, width: 64, height: 64)..classes.add("emoji"));
-    h.append(ParagraphElement()..text = ":$name:");
+        ImageElement(src: url, width: 64, height: 64)..classes.add('emoji'));
+    h.append(ParagraphElement()..text = ':$name:');
     emojiDiv.append(h);
   });
 }
@@ -36,15 +36,15 @@ void filter(String query) {
     return;
   }
   lastQuery = query;
-  var boxes = emojiDiv.children;
-  for (var box in boxes) {
-    var boxName = box.querySelector("p");
-    var t = boxName.text;
-    var name = t.substring(1, t.length - 1);
+  final boxes = emojiDiv.children;
+  for (final box in boxes) {
+    final boxName = box.querySelector('p');
+    final t = boxName.text;
+    final name = t.substring(1, t.length - 1);
     if (name.contains(query)) {
-      box.style.display = "inline";
+      box.style.display = 'inline';
     } else {
-      box.style.display = "none";
+      box.style.display = 'none';
     }
   }
 }

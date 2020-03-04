@@ -1,34 +1,28 @@
 # GitHub for Dart
 
-[![Build Status](https://travis-ci.org/DirectMyFile/github.dart.svg?branch=master)](https://travis-ci.org/DirectMyFile/github.dart)
+![](https://github.com/SpinlockLabs/github.dart/workflows/Dart%20CI/badge.svg)
 [![Pub](https://img.shields.io/pub/v/github.svg)](https://pub.dartlang.org/packages/github)
 
-This is a Client Library for GitHub in Dart. I wrote this out of necessity, and then when I got a great reaction from the Dart community, I decided to put a lot of effort into it.
+This is a library for interacting with GitHub in Dart. It works on all platforms including web, server, and Flutter.
+Please submit issues and pull requests, help out, or just give encouragement.
 
-Please submit issues and pull requests, join my IRC channel (#directcode on irc.esper.net), help out, or just give me encouragement.
-
-**Notice**: We are looking for major contributors. Contact us by email or on IRC!
-
-## Links
-
-- [Library Demos](http://github.directcode.org/demos/)
-- [Pub Package](https://pub.dartlang.org/packages/github)
-- [Wiki](https://github.com/DirectMyFile/github.dart/wiki)
+**Notice**: We are looking for contributors. If you're interested or have questions, join the chat at https://gitter.im/SpinlockLabs/community
 
 ## Features
 
-### Current
-
-- Works on the Server and in the Browser
+- Works on the Server, Browser, and Flutter
 - Really Fast
 - Plugable API
 - Supports Authentication
 - Builtin OAuth2 Flow
 - Hook Server Helper
 
-### Work in Progress
+## Links
 
-- Support all the GitHub APIs (Progress: 98%)
+- [Library Demos](http://github.directcode.org/demos/)
+- [Pub Package](https://pub.dartlang.org/packages/github)
+- [Wiki](https://github.com/SpinlockLabs/github.dart/wiki)
+- [Latest API reference](https://pub.dev/documentation/github/latest/)
 
 ## Getting Started
 
@@ -36,47 +30,53 @@ First, add the following to your pubspec.yaml:
 
 ```yaml
 dependencies:
-  github: ^5.0.0
+  github: ^6.0.0
 ```
 
-Then import the library and use it:
+Then import the library
 
-**For the Server**
 ```dart
-import 'package:github/server.dart';
+import 'package:github/github.dart';
+```
 
-void main() {
-  /* Creates a GitHub Client */
-  var github = createGitHubClient();
-  
-  github.repositories.getRepository(new RepositorySlug("DirectMyFile", "github.dart")).then((Repository repo) {
-    /* Do Something */
-  });
+and then use it:
+
+### Example
+
+```dart
+import 'package:github/github.dart';
+
+Future<void> main() async {
+  /* Create a GitHub Client, with anonymous authentication by default */
+  var github = GitHub();
+
+  /*
+  or Create a GitHub Client and have it try to find your token or credentials automatically
+  In Flutter and in server environments this will search environment variables in this order
+  GITHUB_ADMIN_TOKEN
+  GITHUB_DART_TOKEN
+  GITHUB_API_TOKEN
+  GITHUB_TOKEN
+  HOMEBREW_GITHUB_API_TOKEN
+  MACHINE_GITHUB_API_TOKEN
+  and then GITHUB_USERNAME and GITHUB_PASSWORD
+
+  In a browser it will search keys in the same order first through the query string parameters
+  and then in window sessionStorage
+  */
+  var github = GitHub(auth: findAuthenticationFromEnvironment());
+
+  /* or Create a GitHub Client using an auth token */
+  var github = GitHub(auth: Authentication.withToken('YourTokenHere'));
+
+  /* or Create a GitHub Client using a username and password */
+  var github = GitHub(auth: Authentication.basic('username', 'password'));
+
+  Repository repo = await github.repositories.getRepository(RepositorySlug('user_or_org', 'repo_name'));
+  /* Do Something with repo */
 }
-```
-
-**For the Browser**
-```dart
-import 'package:github/browser.dart';
-
-void main() {
-  /* Creates a GitHub Client */
-  var github = createGitHubClient();
-  
-  github.repositories.getRepository(new RepositorySlug("DirectMyFile", "github.dart")).then((Repository repo) {
-    /* Do Something */
-  });
-}
-```
-
-## Authentication
-
-To use a GitHub token:
-
-```dart
-var github = createGitHubClient(auth: new Authentication.withToken("YourTokenHere"));
 ```
 
 ## Contacting Us
 
-You can find us on `irc.esper.net and irc.freenode.net` at `#directcode`.
+Join our Gitter chat at https://gitter.im/SpinlockLabs/community

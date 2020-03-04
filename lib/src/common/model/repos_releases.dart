@@ -1,36 +1,62 @@
+import 'dart:typed_data';
+
 import 'package:github/src/common/model/users.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'repos_releases.g.dart';
 
 /// Model class for a release.
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Release {
-  @JsonKey(ignore: true)
-  Map json;
+  Release({
+    this.id,
+    this.url,
+    this.htmlUrl,
+    this.tarballUrl,
+    this.uploadUrl,
+    this.nodeId,
+    this.tagName,
+    this.targetCommitish,
+    this.name,
+    this.body,
+    this.description,
+    this.isDraft,
+    this.isPrerelease,
+    this.createdAt,
+    this.publishedAt,
+    this.author,
+    this.assets,
+  });
 
   /// Url to this Release
-  @JsonKey(name: "html_url")
+  String url;
+
+  /// Url to this Release
   String htmlUrl;
 
   /// Tarball of the Repository Tree at the commit of this release.
-  @JsonKey(name: "tarball_url")
   String tarballUrl;
 
   /// ZIP of the Repository Tree at the commit of this release.
-  @JsonKey(name: "zipball_url")
   String zipballUrl;
+
+  /// The endpoint for uploading release assets.
+  /// This key is a hypermedia resource. https://developer.github.com/v3/#hypermedia
+  String uploadUrl;
+
+  String assetsUrl;
 
   /// Release ID
   int id;
 
+  String nodeId;
+
   /// Release Tag Name
-  @JsonKey(name: "tag_name")
   String tagName;
 
   /// Target Commit
-  @JsonKey(name: "target_commitish")
-  String targetCommitsh;
+  String targetCommitish;
 
   /// Release Name
   String name;
@@ -42,51 +68,54 @@ class Release {
   String description;
 
   /// If the release is a draft.
-  bool draft;
+  @JsonKey(name: 'draft')
+  bool isDraft;
 
   /// If the release is a pre-release.
-  bool prerelease;
+  @JsonKey(name: 'prerelease')
+  bool isPrerelease;
 
   /// The time this release was created at.
-  @JsonKey(name: "created_at")
   DateTime createdAt;
 
   /// The time this release was published at.
-  @JsonKey(name: "published_at")
   DateTime publishedAt;
 
   /// The author of this release.
-  @JsonKey(toJson: _authorToJson)
   User author;
 
   /// Release Assets
-  @JsonKey(toJson: _assetsToJson)
   List<ReleaseAsset> assets;
 
-  static Release fromJson(Map<String, dynamic> input) {
-    if (input == null) return null;
+  List errors;
 
-    return _$ReleaseFromJson(input)..json = input;
-  }
+  factory Release.fromJson(Map<String, dynamic> input) =>
+      _$ReleaseFromJson(input);
+  Map<String, dynamic> toJson() => _$ReleaseToJson(this);
 
-  static List<Map<String, dynamic>> _assetsToJson(List<ReleaseAsset> value) =>
-      value.map((asset) => asset.toJson()).toList();
+  String getUploadUrlFor(String name, [String label]) =>
+      "${uploadUrl.substring(0, uploadUrl.indexOf('{'))}?name=$name${label != null ? ",$label" : ""}";
 
-  static Map<String, dynamic> _authorToJson(User value) => value.toJson();
-
-  Map<String, dynamic> toJson() {
-    return _$ReleaseToJson(this);
-  }
+  bool get hasErrors => errors?.isNotEmpty;
 }
 
 /// Model class for a release asset.
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class ReleaseAsset {
-  @JsonKey(ignore: true)
-  Map json;
+  ReleaseAsset({
+    this.id,
+    this.name,
+    this.label,
+    this.state,
+    this.contentType,
+    this.size,
+    this.downloadCount,
+    this.browserDownloadUrl,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   /// Url to download the asset.
-  @JsonKey(name: "browser_download_url")
   String browserDownloadUrl;
 
   /// Asset ID
@@ -102,46 +131,32 @@ class ReleaseAsset {
   String state;
 
   /// Asset Content Type
-  @JsonKey(name: "content_type")
   String contentType;
 
   /// Size of Asset
   int size;
 
   /// Number of Downloads
-  @JsonKey(name: "download_count")
   int downloadCount;
 
   /// Time the asset was created at
-  @JsonKey(name: "created_at")
   DateTime createdAt;
 
   /// Time the asset was last updated
-  @JsonKey(name: "updated_at")
   DateTime updatedAt;
 
-  static ReleaseAsset fromJson(Map<String, dynamic> input) {
-    if (input == null) return null;
-
-    return _$ReleaseAssetFromJson(input)..json = input;
-  }
-
-  Map<String, dynamic> toJson() {
-    return _$ReleaseAssetToJson(this);
-  }
+  factory ReleaseAsset.fromJson(Map<String, dynamic> input) =>
+      _$ReleaseAssetFromJson(input);
+  Map<String, dynamic> toJson() => _$ReleaseAssetToJson(this);
 }
 
 /// Model class for a new release to be created.
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CreateRelease {
-  Map<String, dynamic> json;
-
   /// Tag Name to Base off of
-  @JsonKey(name: 'tag_name')
   final String tagName;
 
   /// Commit to Target
-  @JsonKey(name: 'target_commitish')
   String targetCommitish;
 
   /// Release Name
@@ -151,20 +166,74 @@ class CreateRelease {
   String body;
 
   /// If the release is a draft
-  bool draft;
+  @JsonKey(name: 'draft')
+  bool isDraft;
 
-  /// If the release should actually be released.
-  bool prerelease;
+  /// true to identify the release as a prerelease.
+  /// false to identify the release as a full release. Default: false
+  @JsonKey(name: 'prerelease')
+  bool isPrerelease;
 
   CreateRelease(this.tagName);
 
-  static CreateRelease fromJson(Map<String, dynamic> input) {
-    if (input == null) return null;
+  CreateRelease.from({
+    @required this.tagName,
+    @required this.name,
+    @required this.targetCommitish,
+    @required this.isDraft,
+    @required this.isPrerelease,
+    this.body,
+  });
 
-    return _$CreateReleaseFromJson(input)..json = input;
-  }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CreateRelease &&
+          runtimeType == other.runtimeType &&
+          tagName == other.tagName &&
+          targetCommitish == other.targetCommitish &&
+          name == other.name &&
+          body == other.body &&
+          isDraft == other.isDraft &&
+          isPrerelease == other.isPrerelease;
 
-  Map<String, dynamic> toJson() {
-    return _$CreateReleaseToJson(this);
-  }
+  @override
+  int get hashCode =>
+      tagName.hashCode ^
+      targetCommitish.hashCode ^
+      name.hashCode ^
+      body.hashCode ^
+      isDraft.hashCode ^
+      isPrerelease.hashCode;
+
+  factory CreateRelease.fromJson(Map<String, dynamic> input) =>
+      _$CreateReleaseFromJson(input);
+  Map<String, dynamic> toJson() => _$CreateReleaseToJson(this);
+}
+
+class CreateReleaseAsset {
+  CreateReleaseAsset({
+    @required this.name,
+    @required this.contentType,
+    @required this.assetData,
+    this.label,
+  });
+
+  /// The file name of the asset.
+  String name;
+
+  /// An alternate short description of the asset. Used in place of the filename.
+  String label;
+
+  /// The media type of the asset.
+  ///
+  /// For a list of media types,
+  /// see [Media Types](https://www.iana.org/assignments/media-types/media-types.xhtml).
+  /// For example: application/zip
+  String contentType;
+
+  /// The raw binary data for the asset being uploaded.
+  ///
+  /// GitHub expects the asset data in its raw binary form, rather than JSON.
+  Uint8List assetData;
 }

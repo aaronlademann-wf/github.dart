@@ -1,8 +1,8 @@
-import "dart:html";
-import "common.dart";
+import 'dart:html';
+import 'common.dart';
 
 Future<void> main() async {
-  await initViewSourceButton("zen.dart");
-  String msg = await github.misc.getZen();
-  querySelector("#zen").text = msg;
+  await initViewSourceButton('zen.dart');
+  final msg = await github.misc.getZen();
+  querySelector('#zen').text = msg;
 }

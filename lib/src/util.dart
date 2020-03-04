@@ -1,21 +1,23 @@
 final RegExp githubDateRemoveRegExp = RegExp(r'\.\d*');
 
+const v3ApiMimeType = 'application/vnd.github.v3+json';
+
 String buildQueryString(Map<String, dynamic> params) {
-  var queryString = StringBuffer();
+  final queryString = StringBuffer();
 
   if (params.isNotEmpty && !params.values.every((value) => value == null)) {
-    queryString.write("?");
+    queryString.write('?');
   }
 
   var i = 0;
-  for (var key in params.keys) {
+  for (final key in params.keys) {
     i++;
     if (params[key] == null) {
       continue;
     }
-    queryString.write("$key=${Uri.encodeComponent(params[key].toString())}");
+    queryString.write('$key=${Uri.encodeComponent(params[key].toString())}');
     if (i != params.keys.length) {
-      queryString.write("&");
+      queryString.write('&');
     }
   }
   return queryString.toString();
@@ -27,7 +29,7 @@ dynamic copyOf(dynamic input) {
   } else if (input is Map) {
     return Map.from(input);
   } else {
-    throw "type could not be copied";
+    throw Exception('type could not be copied');
   }
 }
 
@@ -40,8 +42,8 @@ void putValue(String name, dynamic value, Map<String, dynamic> map) {
 }
 
 List<MapEntry<dynamic, dynamic>> mapToList(Map<dynamic, dynamic> input) {
-  var out = <MapEntry<dynamic, dynamic>>[];
-  for (var key in input.keys) {
+  final out = <MapEntry<dynamic, dynamic>>[];
+  for (final key in input.keys) {
     out.add(MapEntry<dynamic, dynamic>(key, input[key]));
   }
   return out;
@@ -64,8 +66,8 @@ DateTime parseDateTime(String input) {
 }
 
 Map<String, dynamic> createNonNullMap(Map<String, dynamic> input) {
-  var map = <String, dynamic>{};
-  for (var key in input.keys) {
+  final map = <String, dynamic>{};
+  for (final key in input.keys) {
     if (input[key] != null) {
       map[key] = input[key];
     }
@@ -76,15 +78,17 @@ Map<String, dynamic> createNonNullMap(Map<String, dynamic> input) {
 // TODO: only used in test – delete?
 int parseFancyNumber(String input) {
   input = input.trim();
-  if (input.contains(",")) input = input.replaceAll(",", "");
+  if (input.contains(',')) {
+    input = input.replaceAll(',', '');
+  }
 
-  var multipliers = {"h": 100, "k": 1000, "ht": 100000, "m": 1000000};
+  const multipliers = {'h': 100, 'k': 1000, 'ht': 100000, 'm': 1000000};
   int value;
 
   if (!multipliers.keys.any((m) => input.endsWith(m))) {
     value = int.parse(input);
   } else {
-    var m = multipliers.keys.firstWhere((m) => input.endsWith(m));
+    final m = multipliers.keys.firstWhere((m) => input.endsWith(m));
     input = input.substring(0, input.length - m.length);
     value = num.parse(input) * multipliers[m];
   }

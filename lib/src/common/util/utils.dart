@@ -1,4 +1,5 @@
-part of github.common;
+import 'package:github/src/common.dart';
+import 'package:github/src/util.dart';
 
 /// Marks something as not being ready or complete.
 class NotReadyYet {
@@ -25,9 +26,9 @@ String dateToGitHubIso8601(DateTime date) {
 }
 
 RepositorySlug slugFromAPIUrl(String url) {
-  var split = url.split("/");
-  var i = split.indexOf("repos") + 1;
-  var parts = split.sublist(i, i + 2);
+  final split = url.split('/');
+  final i = split.indexOf('repos') + 1;
+  final parts = split.sublist(i, i + 2);
   return RepositorySlug(parts[0], parts[1]);
 }
 

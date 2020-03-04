@@ -1,4 +1,5 @@
-part of github.common;
+import 'dart:async';
+import 'package:github/src/common.dart';
 
 // Crawls a Repository to Fetch All Files
 class RepositoryCrawler {
@@ -9,9 +10,9 @@ class RepositoryCrawler {
 
   Stream<GitHubFile> crawl() async* {
     Stream<GitHubFile> scan(String path) async* {
-      var contents = await github.repositories.getContents(slug, path);
+      final contents = await github.repositories.getContents(slug, path);
 
-      for (var content in contents.tree) {
+      for (final content in contents.tree) {
         if (content.type == 'dir') {
           yield* scan(content.path);
         } else {
@@ -20,6 +21,6 @@ class RepositoryCrawler {
       }
     }
 
-    yield* scan("/");
+    yield* scan('/');
   }
 }

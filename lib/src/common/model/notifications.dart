@@ -1,45 +1,54 @@
-part of github.common;
+import 'package:github/src/common.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'notifications.g.dart';
 
 /// Model class for notifications.
+@JsonSerializable(createToJson: false)
 class Notification {
-  String id;
-  Repository repository;
-  NotificationSubject subject;
-  String reason;
-  bool unread;
+  Notification({
+    this.id,
+    this.repository,
+    this.subject,
+    this.reason,
+    this.unread,
+    this.updatedAt,
+    this.lastReadAt,
+    this.url,
+    this.subscriptionUrl,
+  });
+  final String id;
+  final Repository repository;
+  final NotificationSubject subject;
+  final String reason;
+  final bool unread;
 
-  @JsonKey(name: "updated_at")
-  DateTime updatedAt;
+  @JsonKey(name: 'updated_at')
+  final DateTime updatedAt;
 
-  @JsonKey(name: "last_read_at")
-  DateTime lastReadAt;
+  @JsonKey(name: 'last_read_at')
+  final DateTime lastReadAt;
 
-  static Notification fromJSON(Map<String, dynamic> input) {
-    if (input == null) return null;
+  final String url;
 
-    return Notification()
-      ..id = input['id']
-      ..repository =
-          Repository.fromJSON(input['repository'] as Map<String, dynamic>)
-      ..subject =
-          NotificationSubject.fromJSON(input['subject'] as Map<String, dynamic>)
-      ..reason = input['reason']
-      ..unread = input['unread']
-      ..updatedAt = parseDateTime(input['updated_at'])
-      ..lastReadAt = parseDateTime(input['last_read_at']);
-  }
+  @JsonKey(name: 'subscription_url')
+  final String subscriptionUrl;
+
+  factory Notification.fromJson(Map<String, dynamic> input) =>
+      _$NotificationFromJson(input);
 }
 
 /// Model class for a notification subject.
+@JsonSerializable(createToJson: false)
 class NotificationSubject {
-  String title;
-  String type;
+  NotificationSubject({this.title, this.type, this.url, this.latestCommentUrl});
+  final String title;
+  final String type;
+  final String url;
 
-  static NotificationSubject fromJSON(Map<String, dynamic> input) {
-    if (input == null) return null;
+  @JsonKey(name: 'latest_comment_url')
+  final String latestCommentUrl;
 
-    return NotificationSubject()
-      ..title = input['title']
-      ..type = input['type'];
-  }
+  factory NotificationSubject.fromJson(Map<String, dynamic> input) =>
+      _$NotificationSubjectFromJson(input);
 }

@@ -1,10 +1,12 @@
-import "package:github/server.dart";
+import 'package:github/github.dart';
 
 void main() {
-  var github = GitHub(auth: Authentication.anonymous());
+  final github = GitHub(auth: Authentication.anonymous());
 
-  var crawler = RepositoryCrawler(
-      github, RepositorySlug.full("DirectMyFile/github.dart"));
+  final crawler = RepositoryCrawler(
+    github,
+    RepositorySlug.full('SpinlockLabs/github.dart'),
+  );
 
   crawler.crawl().listen((file) {
     print(file.path);

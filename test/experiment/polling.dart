@@ -1,12 +1,12 @@
-import "package:github/server.dart";
+import 'package:github/github.dart';
 
 void main() {
-  var github = createGitHubClient();
+  final github = GitHub();
 
-  EventPoller poller = github.activity.pollPublicEvents();
+  final poller = github.activity.pollPublicEvents();
 
   poller.start().listen((event) {
-    print("New Event:");
-    print("- Payload: ${event.payload}");
-  }).onDone(() => github.dispose());
+    print('New Event:');
+    print('- Payload: ${event.payload}');
+  }).onDone(github.dispose);
 }

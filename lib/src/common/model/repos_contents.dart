@@ -1,7 +1,28 @@
-part of github.common;
+import 'dart:convert';
+import 'package:github/github.dart';
+import 'package:github/src/common.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'repos_contents.g.dart';
 
 /// Model class for a file on GitHub.
+@JsonSerializable()
 class GitHubFile {
+  GitHubFile({
+    this.type,
+    this.encoding,
+    this.size,
+    this.name,
+    this.path,
+    this.content,
+    this.sha,
+    this.htmlUrl,
+    this.gitUrl,
+    this.downloadUrl,
+    this.links,
+    this.sourceRepository,
+  });
+
   /// Type of File
   String type;
 
@@ -17,30 +38,32 @@ class GitHubFile {
   /// File Path
   String path;
 
-  /// File Content
+  /// Base-64 encoded file content with newlines.
   String content;
 
   /// SHA
   String sha;
 
   /// Url to file
-  @JsonKey(name: "html_url")
+  @JsonKey(name: 'html_url')
   String htmlUrl;
 
   /// Git Url
-  @JsonKey(name: "git_url")
+  @JsonKey(name: 'git_url')
   String gitUrl;
 
+  /// Download Url
+  @JsonKey(name: 'download_url')
+  String downloadUrl;
+
   /// Links
-  @JsonKey(name: "_links")
+  @JsonKey(name: '_links')
   Links links;
 
-  /// Text Content
+  /// The value in [content] Base-64 decoded.
   String get text {
-    if (_text == null) {
-      _text = utf8.decode(base64Decode(content));
-    }
-    return _text;
+    return _text ??=
+        utf8.decode(base64Decode(LineSplitter.split(content).join()));
   }
 
   String _text;
@@ -48,25 +71,9 @@ class GitHubFile {
   /// Source Repository
   RepositorySlug sourceRepository;
 
-  static GitHubFile fromJSON(Map<String, dynamic> input,
-      [RepositorySlug slug]) {
-    if (input == null) return null;
-
-    return GitHubFile()
-      ..type = input['type']
-      ..encoding = input['encoding']
-      ..size = input['size']
-      ..name = input['name']
-      ..path = input['path']
-      ..content = input['content'] == null
-          ? null
-          : LineSplitter.split(input['content']).join()
-      ..sha = input['sha']
-      ..gitUrl = input['git_url']
-      ..htmlUrl = input['html_url']
-      ..links = Links.fromJson(input['_links'] as Map<String, dynamic>)
-      ..sourceRepository = slug;
-  }
+  factory GitHubFile.fromJson(Map<String, dynamic> input) =>
+      _$GitHubFileFromJson(input);
+  Map<String, dynamic> toJson() => _$GitHubFileToJson(this);
 }
 
 @JsonSerializable()
@@ -77,75 +84,72 @@ class Links {
 
   Links({this.git, this.self, this.html});
 
-  factory Links.fromJson(Map<String, dynamic> input) {
-    if (input == null) return null;
-
-    return _$LinksFromJson(input);
-  }
+  factory Links.fromJson(Map<String, dynamic> input) => _$LinksFromJson(input);
 
   Map<String, dynamic> toJson() => _$LinksToJson(this);
 }
 
 /// Model class for a file or directory.
+@JsonSerializable(fieldRename: FieldRename.snake)
 class RepositoryContents {
+  RepositoryContents({
+    this.file,
+    this.tree,
+  });
   GitHubFile file;
   List<GitHubFile> tree;
 
   bool get isFile => file != null;
   bool get isDirectory => tree != null;
+
+  factory RepositoryContents.fromJson(Map<String, dynamic> json) =>
+      _$RepositoryContentsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RepositoryContentsToJson(this);
 }
 
 /// Model class for a new file to be created.
-class CreateFile {
-  final String path;
-  final String message;
-  final String content;
 
+@JsonSerializable(fieldRename: FieldRename.snake)
+class CreateFile {
+  CreateFile(
+      {this.path, this.content, this.message, this.branch, this.committer});
+
+  String path;
+  String message;
+  String content;
   String branch;
   CommitUser committer;
 
-  CreateFile(this.path, this.content, this.message);
+  factory CreateFile.fromJson(Map<String, dynamic> json) =>
+      _$CreateFileFromJson(json);
 
-  String toJSON() {
-    var map = <String, dynamic>{};
-    putValue("path", path, map);
-    putValue("message", message, map);
-    putValue("content", content, map);
-    putValue("branch", branch, map);
-    putValue("committer", committer != null ? committer.toMap() : null, map);
-    return jsonEncode(map);
-  }
+  Map<String, dynamic> toJson() => _$CreateFileToJson(this);
 }
 
 /// Model class for a committer of a commit.
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CommitUser {
+  CommitUser(this.name, this.email);
+
   final String name;
   final String email;
 
-  CommitUser(this.name, this.email);
+  factory CommitUser.fromJson(Map<String, dynamic> input) =>
+      _$CommitUserFromJson(input);
 
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{};
-
-    putValue('name', name, map);
-    putValue('email', email, map);
-
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$CommitUserToJson(this);
 }
 
 /// Model class for the response of a content creation.
+@JsonSerializable()
 class ContentCreation {
   final RepositoryCommit commit;
   final GitHubFile content;
 
   ContentCreation(this.commit, this.content);
 
-  static ContentCreation fromJSON(Map<String, dynamic> input) {
-    if (input == null) return null;
-
-    return ContentCreation(
-        RepositoryCommit.fromJSON(input['commit'] as Map<String, dynamic>),
-        GitHubFile.fromJSON(input['content'] as Map<String, dynamic>));
-  }
+  factory ContentCreation.fromJson(Map<String, dynamic> input) =>
+      _$ContentCreationFromJson(input);
+  Map<String, dynamic> toJson() => _$ContentCreationToJson(this);
 }
